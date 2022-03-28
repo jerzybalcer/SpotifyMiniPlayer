@@ -26,17 +26,18 @@
 
         <Image x:Name="CoverImg" Margin="5,0,0,0" Grid.Column="0" Grid.RowSpan="2"
                HorizontalAlignment="Center" VerticalAlignment="Center"
-               Source="https://i.scdn.co/image/ab67616d0000b273cdd79608fe27a23a3e1070fd"
+               Source=""
                />
 
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.ColumnSpan="3">
-            <TextBlock Text="Title" Foreground="White" FontSize="22"
+            <TextBlock Text="..." Foreground="White" FontSize="22"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Margin="0,5,0,5" x:Name="TitleTxt"/>
-            <TextBlock Text="Artist" Foreground="#b3b3b3" FontSize="16"
+                       Margin="0,5,0,5" Padding="2,0,2,0" x:Name="TitleTxt" 
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding ElementName=TitleTxt, Path=Text}"/>
+
+            <TextBlock Text="..." Foreground="#b3b3b3" FontSize="16"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                       x:Name="ArtistTxt"
-                       />
+                       x:Name="ArtistTxt" TextTrimming="CharacterEllipsis" ToolTip="{Binding ElementName=ArtistTxt, Path=Text}"/>
         </StackPanel>
 
         <Button Style="{StaticResource RoundButton}" x:Name="PlayBtn" Grid.Column="2" Grid.Row="1"
