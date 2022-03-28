@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Spotify Mini Player" Height="150" Width="300" 
         Top="50" Left="0" WindowStyle="None"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" Loaded="Window_Loaded" Topmost="True">
     <Grid x:Name="MainContainer" 
           Background="#181818"
           MouseLeftButtonDown="MainContainer_MouseLeftButtonDown">
@@ -30,12 +30,12 @@
                />
 
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.ColumnSpan="3">
-            <TextBlock Text="Artist" Foreground="White" FontSize="26"
+            <TextBlock Text="Title" Foreground="White" FontSize="22"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Margin="0,5,0,5" x:Name="ArtistTxt"/>
-            <TextBlock Text="Title" Foreground="White" FontSize="18"
+                       Margin="0,5,0,5" x:Name="TitleTxt"/>
+            <TextBlock Text="Artist" Foreground="#b3b3b3" FontSize="16"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                       x:Name="TitleTxt"
+                       x:Name="ArtistTxt"
                        />
         </StackPanel>
 
