@@ -42,29 +42,29 @@ namespace SpotifyMiniPlayer
             DragMove();
         }
 
-        private void PreviousBtn_Click(object sender, RoutedEventArgs e)
+        private async void PreviousBtn_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("previous");
-            _spotify.Player.SkipPrevious();
+            await _spotify.Player.SkipPrevious();
+            UpdatePlayerView();
         }
 
         private async void PlayBtn_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("play");
             if((await _spotify.Player.GetCurrentPlayback()).IsPlaying)
             {
-                _spotify.Player.PausePlayback();
+                await _spotify.Player.PausePlayback();
             }
             else
             {
-                _spotify.Player.ResumePlayback();
-
+                await _spotify.Player.ResumePlayback();
             }
+
+            UpdatePlayerView();
         }
-        private void NextButton_Click(object sender, RoutedEventArgs e)
+        private async void NextButton_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("next");
-            _spotify.Player.SkipNext();
+            await _spotify.Player.SkipNext();
+            UpdatePlayerView();
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -76,6 +76,18 @@ namespace SpotifyMiniPlayer
             else
             {
                 await StartAuthentication();
+            }
+        }
+
+        private async void UpdatePlayerView()
+        {
+            var currentlyPlaying = await _spotify.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest());
+
+            if (currentlyPlaying is not null && currentlyPlaying.Item is FullTrack track)
+            {
+                TitleTxt.Text = track.Name;
+                ArtistTxt.Text = track.Artists[0].Name;
+                CoverImg.Source = new BitmapImage(new Uri(track.Album.Images[0].Url));
             }
         }
 
@@ -91,15 +103,8 @@ namespace SpotifyMiniPlayer
               .WithAuthenticator(authenticator);
 
             _spotify = new SpotifyClient(config);
-            var currentlyPlaying = await _spotify.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest());
 
-            if(currentlyPlaying.Item is FullTrack track)
-            {
-                TitleTxt.Text = track.Name;
-                ArtistTxt.Text = track.Artists[0].Name;
-                CoverImg.Source = new BitmapImage(new Uri(track.Album.Images[0].Url));
-            }
-
+            UpdatePlayerView();
             _server.Dispose();
         }
 

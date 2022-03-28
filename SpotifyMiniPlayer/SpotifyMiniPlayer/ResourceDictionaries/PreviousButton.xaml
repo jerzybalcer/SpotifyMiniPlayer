@@ -33,7 +33,7 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Polygon Points="0 10,20 0,20 20" 
                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                             Fill="White"/>
+                             Fill="#b3b3b3"/>
                     <!--<ControlTemplate.Triggers>
                         <Trigger Property="IsDefaulted" Value="true">
                             <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>

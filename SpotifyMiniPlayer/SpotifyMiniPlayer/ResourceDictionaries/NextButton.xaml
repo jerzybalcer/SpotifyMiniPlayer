@@ -15,7 +15,7 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Polygon Points="0 0,20 10,0 20" 
                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                             Fill="White"/>                </ControlTemplate>
+                             Fill="#b3b3b3"/>                </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>

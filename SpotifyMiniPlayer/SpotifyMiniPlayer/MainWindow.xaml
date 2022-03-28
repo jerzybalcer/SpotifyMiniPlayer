@@ -43,7 +43,8 @@
         <Button Style="{StaticResource RoundButton}" x:Name="PlayBtn" Grid.Column="2" Grid.Row="1"
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                  Background="White" BorderBrush="Transparent"
-                 Margin="5,15,5,15" Click="PlayBtn_Click"/>
+                 Margin="5,15,5,15" Click="PlayBtn_Click">
+        </Button>
 
         <Button Style="{StaticResource PreviousButton}" x:Name="PreviousBtn" 
                 Grid.Column="1" Grid.Row="1"
