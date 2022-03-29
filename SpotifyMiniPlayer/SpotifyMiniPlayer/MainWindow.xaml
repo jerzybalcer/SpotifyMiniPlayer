@@ -44,6 +44,18 @@
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                  Background="White" BorderBrush="Transparent"
                  Margin="5,15,5,15" Click="PlayBtn_Click">
+            <Button.Content>
+                <Grid>
+                    <Path x:Name="PauseIcon" Stroke="Black" 
+                      StrokeThickness="4" 
+                      Data="M 0,0 L 0,15 M 5,0 L 5,15" 
+                      Stretch="Fill" Margin="14,10,14,10" Visibility="Visible"/>
+                    <Polygon x:Name="ResumeIcon" Stroke="Black" Fill="Black"
+                      StrokeThickness="3" 
+                      Points="0,0 30,15 0,30" 
+                      Stretch="Fill" Margin="14,13,13,13" Visibility="Visible"/>
+                </Grid>
+            </Button.Content>
         </Button>
 
         <Button Style="{StaticResource PreviousButton}" x:Name="PreviousBtn" 

@@ -52,11 +52,17 @@ namespace SpotifyMiniPlayer
         {
             if((await _spotify.Player.GetCurrentPlayback()).IsPlaying)
             {
+                PauseIcon.Visibility = Visibility.Hidden;
+                ResumeIcon.Visibility = Visibility.Visible;
                 await _spotify.Player.PausePlayback();
+
             }
             else
             {
+                ResumeIcon.Visibility = Visibility.Hidden;
+                PauseIcon.Visibility = Visibility.Visible;
                 await _spotify.Player.ResumePlayback();
+
             }
 
             UpdatePlayerView();
