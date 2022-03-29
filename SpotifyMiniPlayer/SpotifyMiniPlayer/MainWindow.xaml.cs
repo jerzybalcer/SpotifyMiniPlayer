@@ -1,27 +1,13 @@
-﻿using Newtonsoft.Json;
-using SpotifyAPI.Web;
-using SpotifyAPI.Web.Auth;
+﻿using SpotifyAPI.Web;
+using SpotifyMiniPlayer.Authentication;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using static SpotifyAPI.Web.Scopes;
-
 
 namespace SpotifyMiniPlayer
 {
@@ -30,9 +16,7 @@ namespace SpotifyMiniPlayer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const string CredentialsPath = "credentials.json";
-        private static readonly string? clientId = "4d100c339810485a8477076ce2774cd1";
-        private static readonly EmbedIOAuthServer _server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+
         private SpotifyClient _spotify;
         private string _localAppState = "";
         public MainWindow()
@@ -93,14 +77,34 @@ namespace SpotifyMiniPlayer
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (File.Exists(CredentialsPath))
+            MainContainer.Visibility = Visibility.Collapsed;
+
+            AuthenticationManager authenticationManager = new AuthenticationManager();
+
+            if (authenticationManager.IsAuthorizationCodePresent)
             {
-                await Start();
+                _spotify = await authenticationManager.StartAuthorization();
             }
             else
             {
-                await StartAuthentication();
+                await authenticationManager.StartAuthentication();
+
+                while (!authenticationManager.AuthenticationFinished)
+                {
+                    await Task.Delay(10);
+                }
+
+                _spotify = await authenticationManager.StartAuthorization();
             }
+
+            MainContainer.Visibility = Visibility.Visible;
+
+            UpdatePlayerView();
+
+            DispatcherTimer localSpotifyChecker = new DispatcherTimer();
+            localSpotifyChecker.Interval = TimeSpan.FromSeconds(1);
+            localSpotifyChecker.Tick += (source, e) => { GetLocalSpotifyInfo(); };
+            localSpotifyChecker.Start();
         }
 
         private async void UpdatePlayerView()
@@ -145,63 +149,6 @@ namespace SpotifyMiniPlayer
             }
 
             _localAppState = proc.MainWindowTitle;
-        }
-
-        private async Task Start()
-        {
-            var json = await File.ReadAllTextAsync(CredentialsPath);
-            var token = JsonConvert.DeserializeObject<PKCETokenResponse>(json);
-
-            var authenticator = new PKCEAuthenticator(clientId!, token!);
-            authenticator.TokenRefreshed += (sender, token) => File.WriteAllText(CredentialsPath, JsonConvert.SerializeObject(token));
-
-            var config = SpotifyClientConfig.CreateDefault()
-              .WithAuthenticator(authenticator);
-
-            _spotify = new SpotifyClient(config);
-
-            UpdatePlayerView();
-
-            DispatcherTimer localSpotifyChecker = new DispatcherTimer();
-            localSpotifyChecker.Interval = TimeSpan.FromSeconds(1);
-            localSpotifyChecker.Tick += (source, e) => { GetLocalSpotifyInfo(); };
-            localSpotifyChecker.Start();
-            
-            _server.Dispose();
-        }
-
-        private async Task StartAuthentication()
-        {
-            var (verifier, challenge) = PKCEUtil.GenerateCodes();
-
-            await _server.Start();
-            _server.AuthorizationCodeReceived += async (sender, response) =>
-            {
-                await _server.Stop();
-                PKCETokenResponse token = await new OAuthClient().RequestToken(
-                  new PKCETokenRequest(clientId!, response.Code, _server.BaseUri, verifier)
-                );
-
-                await File.WriteAllTextAsync(CredentialsPath, JsonConvert.SerializeObject(token));
-                await Start();
-            };
-
-            var request = new LoginRequest(_server.BaseUri, clientId!, LoginRequest.ResponseType.Code)
-            {
-                CodeChallenge = challenge,
-                CodeChallengeMethod = "S256",
-                Scope = new List<string> { UserReadCurrentlyPlaying, UserReadRecentlyPlayed, UserReadPlaybackState, UserReadPlaybackPosition, UserModifyPlaybackState }
-            };
-
-            Uri uri = request.ToUri();
-            try
-            {
-                BrowserUtil.Open(uri);
-            }
-            catch (Exception)
-            {
-                Debug.WriteLine("Unable to open URL, manually open: {0}", uri);
-            }
         }
 
         private void QuitMenuItem_Click(object sender, RoutedEventArgs e)
