@@ -47,15 +47,17 @@ namespace SpotifyMiniPlayer
 
         private async void PlayBtn_Click(object sender, RoutedEventArgs e)
         {
-            bool isPlaying = (await _spotify.Player.GetCurrentPlayback()).IsPlaying;
-
-            if (isPlaying)
+            var playback = await _spotify.Player.GetCurrentPlayback();
+            
+            if (playback is not null && playback.IsPlaying)
             {
                 await _spotify.Player.PausePlayback();
             }
             else
             {
-                await _spotify.Player.ResumePlayback();
+                var devices = (await _spotify.Player.GetAvailableDevices()).Devices;
+                
+                await _spotify.Player.ResumePlayback(new PlayerResumePlaybackRequest { DeviceId = devices[0].Id });
             }
 
             UpdatePlayerView();
