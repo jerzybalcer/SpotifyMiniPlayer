@@ -43,7 +43,7 @@
         <Button Style="{StaticResource RoundButton}" x:Name="PlayBtn" Grid.Column="2" Grid.Row="1"
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                  Background="White" BorderBrush="Transparent"
-                 Margin="5,15,5,15" Click="PlayBtn_Click">
+                 Margin="5,15,5,15" Click="PlayBtn_Click" Focusable="False">
             <Button.Content>
                 <Grid>
                     <Path x:Name="PauseIcon" Stroke="Black" 

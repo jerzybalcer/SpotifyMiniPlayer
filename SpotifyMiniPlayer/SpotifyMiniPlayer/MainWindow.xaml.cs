@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using static SpotifyAPI.Web.Scopes;
 
 
@@ -32,6 +34,7 @@ namespace SpotifyMiniPlayer
         private static readonly string? clientId = "4d100c339810485a8477076ce2774cd1";
         private static readonly EmbedIOAuthServer _server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
         private SpotifyClient _spotify;
+        private string _localAppState = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -42,34 +45,31 @@ namespace SpotifyMiniPlayer
             DragMove();
         }
 
-        private async void PreviousBtn_Click(object sender, RoutedEventArgs e)
-        {
-            await _spotify.Player.SkipPrevious();
-            UpdatePlayerView();
-        }
-
         private async void PlayBtn_Click(object sender, RoutedEventArgs e)
         {
-            if((await _spotify.Player.GetCurrentPlayback()).IsPlaying)
-            {
-                PauseIcon.Visibility = Visibility.Hidden;
-                ResumeIcon.Visibility = Visibility.Visible;
-                await _spotify.Player.PausePlayback();
+            bool isPlaying = (await _spotify.Player.GetCurrentPlayback()).IsPlaying;
 
+            if (isPlaying)
+            {
+                await _spotify.Player.PausePlayback();
             }
             else
             {
-                ResumeIcon.Visibility = Visibility.Hidden;
-                PauseIcon.Visibility = Visibility.Visible;
                 await _spotify.Player.ResumePlayback();
-
             }
 
+            UpdatePlayerView();
+        }
+        private async void PreviousBtn_Click(object sender, RoutedEventArgs e)
+        {
+            await _spotify.Player.SkipPrevious();
+            await Task.Delay(100);
             UpdatePlayerView();
         }
         private async void NextButton_Click(object sender, RoutedEventArgs e)
         {
             await _spotify.Player.SkipNext();
+            await Task.Delay(100);
             UpdatePlayerView();
         }
 
@@ -94,7 +94,39 @@ namespace SpotifyMiniPlayer
                 TitleTxt.Text = track.Name;
                 ArtistTxt.Text = track.Artists[0].Name;
                 CoverImg.Source = new BitmapImage(new Uri(track.Album.Images[0].Url));
+                UpdatePlayButtonState(currentlyPlaying.IsPlaying);
             }
+        }
+
+        private void UpdatePlayButtonState(bool isPlaying)
+        {
+            if (isPlaying)
+            {
+                PauseIcon.Visibility = Visibility.Visible;
+                ResumeIcon.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                ResumeIcon.Visibility = Visibility.Visible;
+                PauseIcon.Visibility = Visibility.Hidden;
+            }
+        }
+
+        public void GetLocalSpotifyInfo()
+        {
+            var proc = Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle));
+
+            if (proc == null)
+            {
+                return;
+            }
+
+            if(_localAppState != proc.MainWindowTitle)
+            {
+                UpdatePlayerView();
+            }
+
+            _localAppState = proc.MainWindowTitle;
         }
 
         private async Task Start()
@@ -111,6 +143,12 @@ namespace SpotifyMiniPlayer
             _spotify = new SpotifyClient(config);
 
             UpdatePlayerView();
+
+            DispatcherTimer localSpotifyChecker = new DispatcherTimer();
+            localSpotifyChecker.Interval = TimeSpan.FromSeconds(1);
+            localSpotifyChecker.Tick += (source, e) => { GetLocalSpotifyInfo(); };
+            localSpotifyChecker.Start();
+            
             _server.Dispose();
         }
 
