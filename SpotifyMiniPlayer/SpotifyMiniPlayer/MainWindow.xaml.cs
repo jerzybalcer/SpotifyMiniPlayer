@@ -203,5 +203,10 @@ namespace SpotifyMiniPlayer
                 Debug.WriteLine("Unable to open URL, manually open: {0}", uri);
             }
         }
+
+        private void QuitMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

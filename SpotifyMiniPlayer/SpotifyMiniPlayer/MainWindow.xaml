@@ -17,6 +17,7 @@
             <ContextMenu>
                 <MenuItem Header="Shuffle" IsCheckable="True" IsChecked="False" x:Name="ShuffleMenuItem" Click="ShuffleMenuItem_Click"/>
                 <MenuItem Header="Transparency" IsCheckable="True" IsChecked="False" x:Name="TransparencyMenuItem"/>
+                <MenuItem Header="Quit" Foreground="Red" x:Name="QuitMenuItem" Click="QuitMenuItem_Click"/>
             </ContextMenu>
         </Grid.ContextMenu>
 
