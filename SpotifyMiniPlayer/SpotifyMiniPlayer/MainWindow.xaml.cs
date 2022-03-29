@@ -44,6 +44,17 @@ namespace SpotifyMiniPlayer
         {
             DragMove();
         }
+        private void MainContainer_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (TransparencyMenuItem.IsChecked)
+            {
+                this.Opacity = 0.5;
+            }
+        }
+        private void MainContainer_MouseEnter(object sender, MouseEventArgs e)
+        {
+            this.Opacity = 1.0;
+        }
 
         private async void PlayBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -73,6 +84,11 @@ namespace SpotifyMiniPlayer
             await _spotify.Player.SkipNext();
             await Task.Delay(100);
             UpdatePlayerView();
+        }
+
+        private async void ShuffleMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            await _spotify.Player.SetShuffle(new PlayerShuffleRequest(ShuffleMenuItem.IsChecked));
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
