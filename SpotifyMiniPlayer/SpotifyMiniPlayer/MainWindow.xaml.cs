@@ -83,7 +83,7 @@ namespace SpotifyMiniPlayer
 
             if (authenticationManager.IsAuthorizationCodePresent)
             {
-                _spotify = await authenticationManager.StartAuthorization();
+                _spotify = await authenticationManager.Authorize();
             }
             else
             {
@@ -94,7 +94,7 @@ namespace SpotifyMiniPlayer
                     await Task.Delay(10);
                 }
 
-                _spotify = await authenticationManager.StartAuthorization();
+                _spotify = await authenticationManager.Authorize();
             }
 
             MainContainer.Visibility = Visibility.Visible;
@@ -103,8 +103,25 @@ namespace SpotifyMiniPlayer
 
             DispatcherTimer localSpotifyChecker = new DispatcherTimer();
             localSpotifyChecker.Interval = TimeSpan.FromSeconds(1);
-            localSpotifyChecker.Tick += (source, e) => { GetLocalSpotifyInfo(); };
+            localSpotifyChecker.Tick += GetLocalSpotifyInfo;
             localSpotifyChecker.Start();
+        }
+
+        private void GetLocalSpotifyInfo(object? sender, EventArgs e)
+        {
+            var proc = Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle));
+
+            if (proc == null)
+            {
+                return;
+            }
+
+            if (_localAppState != proc.MainWindowTitle)
+            {
+                UpdatePlayerView();
+            }
+
+            _localAppState = proc.MainWindowTitle;
         }
 
         private async void UpdatePlayerView()
@@ -134,22 +151,22 @@ namespace SpotifyMiniPlayer
             }
         }
 
-        public void GetLocalSpotifyInfo()
-        {
-            var proc = Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle));
+        //public void GetLocalSpotifyInfo()
+        //{
+        //    var proc = Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle));
 
-            if (proc == null)
-            {
-                return;
-            }
+        //    if (proc == null)
+        //    {
+        //        return;
+        //    }
 
-            if(_localAppState != proc.MainWindowTitle)
-            {
-                UpdatePlayerView();
-            }
+        //    if(_localAppState != proc.MainWindowTitle)
+        //    {
+        //        UpdatePlayerView();
+        //    }
 
-            _localAppState = proc.MainWindowTitle;
-        }
+        //    _localAppState = proc.MainWindowTitle;
+        //}
 
         private void QuitMenuItem_Click(object sender, RoutedEventArgs e)
         {

@@ -56,7 +56,7 @@ namespace SpotifyMiniPlayer.Authentication
             }
         }
 
-        public async Task<SpotifyClient> StartAuthorization()
+        public async Task<SpotifyClient> Authorize()
         {
             var json = await File.ReadAllTextAsync(CredentialsPath);
             var token = JsonConvert.DeserializeObject<PKCETokenResponse>(json);

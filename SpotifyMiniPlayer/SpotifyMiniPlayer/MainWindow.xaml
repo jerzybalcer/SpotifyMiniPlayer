@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Spotify Mini Player" Height="150" Width="300" 
         Top="50" Left="0" WindowStyle="None"
-        ResizeMode="NoResize" Loaded="Window_Loaded" Topmost="True" ShowInTaskbar="False" AllowsTransparency="True">
+        ResizeMode="NoResize" Loaded="Window_Loaded" Topmost="True" ShowInTaskbar="False" AllowsTransparency="True" Background="#181818">
     <Grid x:Name="MainContainer" 
           Background="#181818"
           MouseLeftButtonDown="MainContainer_MouseLeftButtonDown"
