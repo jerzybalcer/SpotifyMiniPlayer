@@ -38,11 +38,12 @@
                Source=""
                />
 
-        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.ColumnSpan="3">
-            <TextBlock Text="..." Foreground="White" FontSize="22"
+        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.ColumnSpan="3" x:Name="TitleAndArtistContainer">
+            <TextBlock Text="..." Foreground="White" FontSize="20"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
                        Margin="0,5,0,5" Padding="2,0,2,0" x:Name="TitleTxt" 
-                       TextTrimming="CharacterEllipsis" ToolTip="{Binding ElementName=TitleTxt, Path=Text}"/>
+                       TextTrimming="CharacterEllipsis"
+                       ToolTip="{Binding ElementName=TitleTxt, Path=Text}"/>
 
             <TextBlock Text="..." Foreground="#b3b3b3" FontSize="16"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
