@@ -1,8 +1,7 @@
-﻿using SpotifyAPI.Web;
+﻿using Microsoft.Win32;
+using SpotifyAPI.Web;
 using SpotifyMiniPlayer.Authentication;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -11,23 +10,22 @@ using System.Windows.Threading;
 
 namespace SpotifyMiniPlayer
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
 
-        private SpotifyClient _spotify;
-        private string _localAppState = "";
+        private SpotifyClient? _spotifyApiClient;
+        private string _currentTrackFromSpotifyApp = string.Empty;
+
         public MainWindow()
         {
             InitializeComponent();
-
         }
+
         private void MainContainer_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
         }
+
         private void MainContainer_MouseLeave(object sender, MouseEventArgs e)
         {
             if (TransparencyMenuItem.IsChecked)
@@ -35,6 +33,7 @@ namespace SpotifyMiniPlayer
                 this.Opacity = 0.5;
             }
         }
+
         private void MainContainer_MouseEnter(object sender, MouseEventArgs e)
         {
             this.Opacity = 1.0;
@@ -42,37 +41,39 @@ namespace SpotifyMiniPlayer
 
         private async void PlayBtn_Click(object sender, RoutedEventArgs e)
         {
-            var playback = await _spotify.Player.GetCurrentPlayback();
+            var playback = await _spotifyApiClient!.Player.GetCurrentPlayback();
             
             if (playback is not null && playback.IsPlaying)
             {
-                await _spotify.Player.PausePlayback();
+                await _spotifyApiClient.Player.PausePlayback();
             }
             else
             {
-                var devices = (await _spotify.Player.GetAvailableDevices()).Devices;
+                var devices = (await _spotifyApiClient.Player.GetAvailableDevices()).Devices;
                 
-                await _spotify.Player.ResumePlayback(new PlayerResumePlaybackRequest { DeviceId = devices[0].Id });
+                await _spotifyApiClient.Player.ResumePlayback(new PlayerResumePlaybackRequest { DeviceId = devices[0].Id });
             }
 
             UpdatePlayerView();
         }
+
         private async void PreviousBtn_Click(object sender, RoutedEventArgs e)
         {
-            await _spotify.Player.SkipPrevious();
+            await _spotifyApiClient!.Player.SkipPrevious();
             await Task.Delay(100);
             UpdatePlayerView();
         }
+
         private async void NextButton_Click(object sender, RoutedEventArgs e)
         {
-            await _spotify.Player.SkipNext();
+            await _spotifyApiClient!.Player.SkipNext();
             await Task.Delay(100);
             UpdatePlayerView();
         }
 
         private async void ShuffleMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            await _spotify.Player.SetShuffle(new PlayerShuffleRequest(ShuffleMenuItem.IsChecked));
+            await _spotifyApiClient!.Player.SetShuffle(new PlayerShuffleRequest(ShuffleMenuItem.IsChecked));
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -83,7 +84,7 @@ namespace SpotifyMiniPlayer
 
             if (authenticationManager.IsAuthorizationCodePresent)
             {
-                _spotify = await authenticationManager.Authorize();
+                _spotifyApiClient = await authenticationManager.Authorize();
             }
             else
             {
@@ -94,7 +95,7 @@ namespace SpotifyMiniPlayer
                     await Task.Delay(10);
                 }
 
-                _spotify = await authenticationManager.Authorize();
+                _spotifyApiClient = await authenticationManager.Authorize();
             }
 
             MainContainer.Visibility = Visibility.Visible;
@@ -103,30 +104,35 @@ namespace SpotifyMiniPlayer
 
             DispatcherTimer localSpotifyChecker = new DispatcherTimer();
             localSpotifyChecker.Interval = TimeSpan.FromSeconds(1);
-            localSpotifyChecker.Tick += GetLocalSpotifyInfo;
+            localSpotifyChecker.Tick += GetSpotifyAppInfo;
             localSpotifyChecker.Start();
         }
 
-        private void GetLocalSpotifyInfo(object? sender, EventArgs e)
+        private void GetSpotifyAppInfo(object? sender, EventArgs e)
         {
-            var proc = Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle));
-
-            if (proc == null)
+            if(SpotifyAppAdapter.IsAppRunning())
             {
-                return;
-            }
+                var currentTrack = SpotifyAppAdapter.GetCurrentTrack();
 
-            if (_localAppState != proc.MainWindowTitle)
+                if (_currentTrackFromSpotifyApp != currentTrack)
+                {
+                    UpdatePlayerView();
+                }
+
+                _currentTrackFromSpotifyApp = currentTrack;
+
+                WindowState = WindowState.Normal;
+            }
+            else
             {
-                UpdatePlayerView();
+                WindowState = WindowState.Minimized;
+                UpdatePlayButtonState(false);
             }
-
-            _localAppState = proc.MainWindowTitle;
         }
 
         private async void UpdatePlayerView()
         {
-            var currentlyPlaying = await _spotify.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest());
+            var currentlyPlaying = await _spotifyApiClient!.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest());
 
             if (currentlyPlaying is not null && currentlyPlaying.Item is FullTrack track)
             {
@@ -154,6 +160,13 @@ namespace SpotifyMiniPlayer
         private void QuitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void SetLaunchOnSystemStartup(bool isEnabled)
+        {
+            RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            registryKey!.SetValue("SpotifyMiniPlayer", Environment.ProcessPath!);
         }
     }
 }
