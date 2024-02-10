@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using SpotifyAPI.Web;
+﻿using SpotifyAPI.Web;
 using SpotifyMiniPlayer.Authentication;
 using System;
 using System.Threading.Tasks;
@@ -89,8 +88,6 @@ public partial class MainWindow : Window
         localSpotifyChecker.Interval = TimeSpan.FromSeconds(1);
         localSpotifyChecker.Tick += GetSpotifyAppInfo;
         localSpotifyChecker.Start();
-
-        SetLaunchOnSystemStartup(true);
     }
 
     private void GetSpotifyAppInfo(object? sender, EventArgs e)
@@ -150,13 +147,6 @@ public partial class MainWindow : Window
             ResumeIcon.Visibility = Visibility.Visible;
             PauseIcon.Visibility = Visibility.Hidden;
         }
-    }
-
-    private void SetLaunchOnSystemStartup(bool isEnabled)
-    {
-        RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
-        registryKey!.SetValue("SpotifyMiniPlayer", Environment.ProcessPath!);
     }
 
     private async void Window_StateChanged(object sender, EventArgs e)
