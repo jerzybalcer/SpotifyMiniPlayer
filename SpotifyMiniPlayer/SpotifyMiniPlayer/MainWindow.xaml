@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SpotifyMiniPlayer"
         mc:Ignorable="d"
-        Title="Spotify Mini Player" Height="150" Width="300" 
+        Title="Spotify Mini Player" Height="150" Width="300"
         Top="50" Left="0" WindowStyle="None"
-        ResizeMode="NoResize" Loaded="Window_Loaded" Topmost="True" ShowInTaskbar="False" AllowsTransparency="True" Background="#181818">
+        ResizeMode="NoResize" Loaded="Window_Loaded" StateChanged="Window_StateChanged" Topmost="True" ShowInTaskbar="False" AllowsTransparency="True">
     <Grid x:Name="MainContainer" 
           Background="#181818"
           MouseLeftButtonDown="MainContainer_MouseLeftButtonDown"
@@ -35,7 +35,6 @@
 
         <Image x:Name="CoverImg" Margin="5,0,0,0" Grid.Column="0" Grid.RowSpan="2"
                HorizontalAlignment="Center" VerticalAlignment="Center"
-               Source=""
                />
 
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.ColumnSpan="3" x:Name="TitleAndArtistContainer">
