@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SpotifyAPI.Web" Version="6.2.2" />
-    <PackageReference Include="SpotifyAPI.Web.Auth" Version="6.2.2" />
+    <PackageReference Include="SpotifyAPI.Web" Version="7.1.1" />
+    <PackageReference Include="SpotifyAPI.Web.Auth" Version="7.1.1" />
   </ItemGroup>
 
 </Project>
