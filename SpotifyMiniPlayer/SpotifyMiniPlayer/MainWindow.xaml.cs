@@ -1,6 +1,7 @@
 ﻿using SpotifyAPI.Web;
 using SpotifyMiniPlayer.Authentication;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -59,8 +60,12 @@ public partial class MainWindow : Window
         else
         {
             var devices = (await _spotifyApiClient.Player.GetAvailableDevices()).Devices;
+
+            if (devices.Count == 0) return;
+
+            var deviceToPlayOn = devices.SingleOrDefault(d => d.IsActive) ?? devices[0];
             
-            await _spotifyApiClient.Player.ResumePlayback(new PlayerResumePlaybackRequest { DeviceId = devices[0].Id });
+            await _spotifyApiClient.Player.ResumePlayback(new PlayerResumePlaybackRequest { DeviceId = deviceToPlayOn.Id });
         }
 
         UpdatePlayerView();
@@ -96,7 +101,7 @@ public partial class MainWindow : Window
         {
             var currentTrack = SpotifyAppAdapter.GetCurrentTrack();
 
-            if (_currentTrackFromSpotifyApp != currentTrack && WindowState == WindowState.Normal)
+            if (/*_currentTrackFromSpotifyApp != currentTrack &&*/ WindowState == WindowState.Normal)
             {
                 UpdatePlayerView();
             }
@@ -133,6 +138,24 @@ public partial class MainWindow : Window
             UpdatePlayButtonState(playbackState.IsPlaying);
             ShuffleMenuItem.IsChecked = playbackState.ShuffleState;
         }
+
+        UpdatePossiblePlayerActions(playbackState?.Actions ?? new Actions { Disallows = new System.Collections.Generic.Dictionary<string, bool>() });
+    }
+
+    private void UpdatePossiblePlayerActions(Actions actions)
+    {
+        actions.Disallows.TryGetValue("pausing", out bool cannotPlay);
+        actions.Disallows.TryGetValue("resuming", out bool cannotResume);
+        PlayBtn.IsEnabled = !(cannotPlay && cannotResume);
+
+        actions.Disallows.TryGetValue("skipping_prev", out bool cannotSkipToPrevious);
+        PreviousBtn.IsEnabled = !cannotSkipToPrevious;
+
+        actions.Disallows.TryGetValue("skipping_next", out bool cannotSkipToNext);
+        NextButton.IsEnabled = !cannotSkipToNext;
+
+        actions.Disallows.TryGetValue("toggling_shuffle", out bool cannotShuffle);
+        ShuffleMenuItem.IsEnabled = !cannotShuffle;
     }
 
     private void UpdatePlayButtonState(bool isPlaying)
